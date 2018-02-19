@@ -7,6 +7,7 @@
 
 (define movenum 0)
 (define padding 8)
+(define piece-style "usual")
 (define square-size (+ 84 (* 2 padding)))
 (define frame (new frame%
                    [label "dalkire"]
@@ -21,7 +22,7 @@
     (cond [(char-lower-case? ch) "w"]
           [(char-upper-case? ch) "b"]))
   (define piece-char (string (char-downcase ch)))
-  (define piece (string-append "alpha-" color-char piece-char))
+  (define piece (string-append piece-style "-" color-char piece-char))
   (inset (bitmap (eval (string->symbol piece))) padding))
 
 (define black-sq

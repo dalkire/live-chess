@@ -30,3 +30,166 @@
    "./pieces/alpha/alpha_wp.png"
    "./pieces/alpha/alpha_wq.png"
    "./pieces/alpha/alpha_wr.png"))
+
+(define-runtime-paths
+  (line-bb
+   line-bk
+   line-bn
+   line-bp
+   line-bq
+   line-br
+   line-wb
+   line-wk
+   line-wn
+   line-wp
+   line-wq
+   line-wr)
+  (values
+   "./pieces/line/line_bb.png"
+   "./pieces/line/line_bk.png"
+   "./pieces/line/line_bn.png"
+   "./pieces/line/line_bp.png"
+   "./pieces/line/line_bq.png"
+   "./pieces/line/line_br.png"
+   "./pieces/line/line_wb.png"
+   "./pieces/line/line_wk.png"
+   "./pieces/line/line_wn.png"
+   "./pieces/line/line_wp.png"
+   "./pieces/line/line_wq.png"
+   "./pieces/line/line_wr.png"))
+
+(define-runtime-paths
+  (magnetic-bb
+   magnetic-bk
+   magnetic-bn
+   magnetic-bp
+   magnetic-bq
+   magnetic-br
+   magnetic-wb
+   magnetic-wk
+   magnetic-wn
+   magnetic-wp
+   magnetic-wq
+   magnetic-wr)
+  (values
+   "./pieces/magnetic/magnetic_bb.png"
+   "./pieces/magnetic/magnetic_bk.png"
+   "./pieces/magnetic/magnetic_bn.png"
+   "./pieces/magnetic/magnetic_bp.png"
+   "./pieces/magnetic/magnetic_bq.png"
+   "./pieces/magnetic/magnetic_br.png"
+   "./pieces/magnetic/magnetic_wb.png"
+   "./pieces/magnetic/magnetic_wk.png"
+   "./pieces/magnetic/magnetic_wn.png"
+   "./pieces/magnetic/magnetic_wp.png"
+   "./pieces/magnetic/magnetic_wq.png"
+   "./pieces/magnetic/magnetic_wr.png"))
+
+(define-runtime-paths
+  (mark-bb
+   mark-bk
+   mark-bn
+   mark-bp
+   mark-bq
+   mark-br
+   mark-wb
+   mark-wk
+   mark-wn
+   mark-wp
+   mark-wq
+   mark-wr)
+  (values
+   "./pieces/mark/mark_bb.png"
+   "./pieces/mark/mark_bk.png"
+   "./pieces/mark/mark_bn.png"
+   "./pieces/mark/mark_bp.png"
+   "./pieces/mark/mark_bq.png"
+   "./pieces/mark/mark_br.png"
+   "./pieces/mark/mark_wb.png"
+   "./pieces/mark/mark_wk.png"
+   "./pieces/mark/mark_wn.png"
+   "./pieces/mark/mark_wp.png"
+   "./pieces/mark/mark_wq.png"
+   "./pieces/mark/mark_wr.png"))
+
+(define-runtime-paths
+  (motif-bb
+   motif-bk
+   motif-bn
+   motif-bp
+   motif-bq
+   motif-br
+   motif-wb
+   motif-wk
+   motif-wn
+   motif-wp
+   motif-wq
+   motif-wr)
+  (values
+   "./pieces/motif/motif_bb.png"
+   "./pieces/motif/motif_bk.png"
+   "./pieces/motif/motif_bn.png"
+   "./pieces/motif/motif_bp.png"
+   "./pieces/motif/motif_bq.png"
+   "./pieces/motif/motif_br.png"
+   "./pieces/motif/motif_wb.png"
+   "./pieces/motif/motif_wk.png"
+   "./pieces/motif/motif_wn.png"
+   "./pieces/motif/motif_wp.png"
+   "./pieces/motif/motif_wq.png"
+   "./pieces/motif/motif_wr.png"))
+
+(define-runtime-paths
+  (usual-bb
+   usual-bk
+   usual-bn
+   usual-bp
+   usual-bq
+   usual-br
+   usual-wb
+   usual-wk
+   usual-wn
+   usual-wp
+   usual-wq
+   usual-wr)
+  (values
+   "./pieces/usual/usual_bb.png"
+   "./pieces/usual/usual_bk.png"
+   "./pieces/usual/usual_bn.png"
+   "./pieces/usual/usual_bp.png"
+   "./pieces/usual/usual_bq.png"
+   "./pieces/usual/usual_br.png"
+   "./pieces/usual/usual_wb.png"
+   "./pieces/usual/usual_wk.png"
+   "./pieces/usual/usual_wn.png"
+   "./pieces/usual/usual_wp.png"
+   "./pieces/usual/usual_wq.png"
+   "./pieces/usual/usual_wr.png"))
+
+(define-runtime-paths
+  (utrecht-bb
+   utrecht-bk
+   utrecht-bn
+   utrecht-bp
+   utrecht-bq
+   utrecht-br
+   utrecht-wb
+   utrecht-wk
+   utrecht-wn
+   utrecht-wp
+   utrecht-wq
+   utrecht-wr)
+  (values
+   "./pieces/utrecht/utrecht_bb.png"
+   "./pieces/utrecht/utrecht_bk.png"
+   "./pieces/utrecht/utrecht_bn.png"
+   "./pieces/utrecht/utrecht_bp.png"
+   "./pieces/utrecht/utrecht_bq.png"
+   "./pieces/utrecht/utrecht_br.png"
+   "./pieces/utrecht/utrecht_wb.png"
+   "./pieces/utrecht/utrecht_wk.png"
+   "./pieces/utrecht/utrecht_wn.png"
+   "./pieces/utrecht/utrecht_wp.png"
+   "./pieces/utrecht/utrecht_wq.png"
+   "./pieces/utrecht/utrecht_wr.png"))
+
