@@ -2,7 +2,8 @@
 
 (require racket/gui
          pict
-         "positions.rkt")
+         "positions.rkt"
+         "paths.rkt")
 
 (define movenum 0)
 (define padding 8)
@@ -12,21 +13,16 @@
                    [width (* square-size 8)]
                    [height (+ (* square-size 8) 50)]))
 
-(define piece-bb (bitmap "./pieces/alpha/alpha_bb.png"))
-(define piece-wq (bitmap "./pieces/alpha/alpha_wq.png"))
-
 (define pieces (list-ref states movenum))
 
 (define (char->piece ch)
   ;; check to-lower is valid
-  (define base "./pieces/alpha/alpha_")
-  (define suffix ".png")
-  (define color
+  (define color-char
     (cond [(char-lower-case? ch) "w"]
           [(char-upper-case? ch) "b"]))
-  (define piece (string (char-downcase ch)))
-  (define path (string-append base color piece suffix))
-  (inset (bitmap path) padding))
+  (define piece-char (string (char-downcase ch)))
+  (define piece (string-append "alpha-" color-char piece-char))
+  (inset (bitmap (eval (string->symbol piece))) padding))
 
 (define black-sq
   (filled-rectangle square-size square-size
@@ -37,6 +33,14 @@
   (filled-rectangle square-size square-size
                     #:color (make-color 239 237 209)
                     #:draw-border? #f))
+
+;; (define my-canvas%
+;;   (class canvas%
+;;     (define/override (on-char event)
+;;       (send msg set-label (symbol->string (get-key-code event))))
+;;     (super-new)))
+
+;; (define (move-next ))
 
 (define my-canvas
   (new canvas% [parent frame]
@@ -68,5 +72,8 @@
                  (set! movenum (add1 movenum))
                  (set! pieces (list-ref states movenum))
                  (send my-canvas refresh-now))])
+
+;; (define msg (new message% [parent frame]
+;;                  [label "No events so far..."]))
 
 (send frame show #t)
