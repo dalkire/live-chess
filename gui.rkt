@@ -3,7 +3,8 @@
 (require racket/gui
          pict
          "positions.rkt"
-         "paths.rkt")
+         "paths.rkt"
+         "connect.rkt")
 
 (define movenum 0)
 (define padding 8)
@@ -11,10 +12,19 @@
 (define square-size (+ 84 (* 2 padding)))
 (define frame (new frame%
                    [label "dalkire"]
-                   [width (* square-size 8)]
-                   [height (+ (* square-size 8) 50)]))
+                   [width (+ (* square-size 8) 400)]
+                   [height (* square-size 8)]))
 
 (define pieces (list-ref states movenum))
+
+(define main-panel (new horizontal-panel%
+                        [parent frame]))
+(define board-panel (new panel%
+                         [parent main-panel]))
+(define control-panel (new vertical-panel%
+                           [parent main-panel]
+                           [min-width 400]
+                           [stretchable-width #f]))
 
 (define (char->piece ch)
   ;; check to-lower is valid
@@ -44,7 +54,7 @@
 ;; (define (move-next ))
 
 (define my-canvas
-  (new canvas% [parent frame]
+  (new canvas% [parent board-panel]
      [paint-callback
       (lambda (canvas dc)
         (define count 0)
@@ -60,21 +70,50 @@
             (draw-pict (char->piece p) dc x y))
           (set! count (add1 count))))]))
 
-(new button% [parent frame]
+(define message (new text-field% [parent control-panel]
+                     [label #f]
+                     [style '(multiple)]
+                     [min-width 400]
+                     [stretchable-width #f]
+                     [init-value ""]))
+
+(define button-panel (new horizontal-panel%
+                          [parent control-panel]
+                          [min-height 50]
+                          [stretchable-height #f]))
+
+(new button%
+     [parent button-panel]
      [label "<<"]
      [callback (lambda (button event)
                  (set! movenum (sub1 movenum))
                  (set! pieces (list-ref states movenum))
+                 (send message set-value (number->string movenum))
                  (send my-canvas refresh-now))])
 
-(new button% [parent frame]
+(new button%
+     [parent button-panel]
      [label ">>"]
      [callback (lambda (button event)
                  (set! movenum (add1 movenum))
                  (set! pieces (list-ref states movenum))
+                 (send message set-value (number->string movenum))
                  (send my-canvas refresh-now))])
 
-;; (define msg (new message% [parent frame]
-;;                  [label "No events so far..."]))
+(new button%
+     [parent button-panel]
+     [label "connect"]
+     [callback (lambda (button event)
+                 (connect message))])
+
+(new choice%
+     [parent button-panel]
+     [label #f]
+     [choices '("alpha" "line" "magnetic" "mark" "motif" "usual" "utrecht")]
+     [selection 5]
+     [callback (lambda (choice event)
+                 (define selection (send choice get-string-selection))
+                 (set! piece-style selection)
+                 (send my-canvas refresh-now))])
 
 (send frame show #t)
