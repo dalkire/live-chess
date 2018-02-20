@@ -11,9 +11,7 @@
 (define piece-style "usual")
 (define square-size (+ 84 (* 2 padding)))
 (define frame (new frame%
-                   [label "dalkire"]
-                   [width (+ (* square-size 8) 400)]
-                   [height (* square-size 8)]))
+                   [label "dalkire"]))
 
 (define pieces (list-ref states movenum))
 
@@ -27,13 +25,16 @@
                            [stretchable-width #f]))
 
 (define (char->piece ch)
-  ;; check to-lower is valid
+  (define base (string-append "./pieces/" piece-style "/" piece-style "_"))
+  (define suffix ".png")
   (define color-char
     (cond [(char-lower-case? ch) "w"]
           [(char-upper-case? ch) "b"]))
   (define piece-char (string (char-downcase ch)))
-  (define piece (string-append piece-style "-" color-char piece-char))
-  (inset (bitmap (eval (string->symbol piece))) padding))
+  (define piece (string-append base color-char piece-char suffix))
+  ;; (define piece (string-append piece-style "-" color-char piece-char))
+  ;; (inset (bitmap (eval (string->symbol piece))) padding)
+  (inset (bitmap piece) padding))
 
 (define black-sq
   (filled-rectangle square-size square-size
@@ -45,30 +46,27 @@
                     #:color (make-color 239 237 209)
                     #:draw-border? #f))
 
-;; (define my-canvas%
-;;   (class canvas%
-;;     (define/override (on-char event)
-;;       (send msg set-label (symbol->string (get-key-code event))))
-;;     (super-new)))
-
-;; (define (move-next ))
-
 (define my-canvas
-  (new canvas% [parent board-panel]
-     [paint-callback
-      (lambda (canvas dc)
-        (define count 0)
-        (for ([p pieces])
-          (define-values (row col) (quotient/remainder count 8))
-          (define y (* row square-size))
-          (define x (* col square-size))
-          (cond [(even? (+ row col))
-                 (draw-pict white-sq dc x y)]
-                [else
-                 (draw-pict black-sq dc x y)])
-          (unless (char-whitespace? p)
-            (draw-pict (char->piece p) dc x y))
-          (set! count (add1 count))))]))
+  (new canvas%
+       [parent board-panel]
+       [min-height (* square-size 8)]
+       [min-width (* square-size 8)]
+       [stretchable-height #f]
+       [stretchable-width #f]
+       [paint-callback
+        (lambda (canvas dc)
+          (define count 0)
+          (for ([p pieces])
+            (define-values (row col) (quotient/remainder count 8))
+            (define y (* row square-size))
+            (define x (* col square-size))
+            (cond [(even? (+ row col))
+                   (draw-pict white-sq dc x y)]
+                  [else
+                   (draw-pict black-sq dc x y)])
+            (unless (char-whitespace? p)
+              (draw-pict (char->piece p) dc x y))
+            (set! count (add1 count))))]))
 
 (define message (new text-field% [parent control-panel]
                      [label #f]
