@@ -4,7 +4,8 @@
          pict
          "positions.rkt"
          "paths.rkt"
-         "connect.rkt")
+         "connect.rkt"
+         "board.rkt")
 
 (define movenum 0)
 (define padding 8)
@@ -18,7 +19,10 @@
 (define main-panel (new horizontal-panel%
                         [parent frame]))
 (define board-panel (new panel%
-                         [parent main-panel]))
+                         [parent main-panel]
+                         [min-width 200]
+                         [min-height 200]))
+
 (define control-panel (new vertical-panel%
                            [parent main-panel]
                            [min-width 400]
@@ -46,27 +50,46 @@
                     #:color (make-color 239 237 209)
                     #:draw-border? #f))
 
-(define my-canvas
-  (new canvas%
-       [parent board-panel]
-       [min-height (* square-size 8)]
-       [min-width (* square-size 8)]
-       [stretchable-height #f]
-       [stretchable-width #f]
-       [paint-callback
-        (lambda (canvas dc)
-          (define count 0)
-          (for ([p pieces])
-            (define-values (row col) (quotient/remainder count 8))
-            (define y (* row square-size))
-            (define x (* col square-size))
-            (cond [(even? (+ row col))
-                   (draw-pict white-sq dc x y)]
-                  [else
-                   (draw-pict black-sq dc x y)])
-            (unless (char-whitespace? p)
-              (draw-pict (char->piece p) dc x y))
-            (set! count (add1 count))))]))
+;; (define (canvas-cb pieces sq-size white-sq black-sq)
+;;   (lambda (canvas dc)))
+
+(define (draw-square square dc x y)
+  (draw-pict square dc x y))
+
+(define (draw-piece piece dc x y)
+  (draw-pict piece dc x y))
+
+;; (define (draw-pos row col sq-size dc)
+;;   (define y (* row sq-size))
+;;   (define x (* col sq-size))
+;;   (define sq
+;;     (cond [(even? (+ row col)) white-sq]
+;;           [else black-sq]))
+;;   (draw-square sq x y)
+;;   (unless (char))
+;;   (draw-piece ))
+
+(draw-board board-panel)
+
+;; (define my-canvas
+;;   (new canvas%
+;;        [parent board-panel]
+;;        [style '(transparent)]
+;;        [min-height (* square-size 8)]
+;;        [min-width (* square-size 8)]
+;;        [stretchable-height #f]
+;;        [stretchable-width #f]
+;;        [paint-callback
+;;         (lambda (canvas dc)
+;;           ;; (draw-board dc)
+;;            (define count 0)
+;;           (for ([p pieces])
+;;             (define-values (row col) (quotient/remainder count 8))
+;;             (define y (* row square-size))
+;;             (define x (* col square-size))
+;;             (unless (char-whitespace? p)
+;;               (draw-pict (char->piece p) dc x y))
+;;             (set! count (add1 count))))]))
 
 (define message (new text-field% [parent control-panel]
                      [label #f]
@@ -80,23 +103,23 @@
                           [min-height 50]
                           [stretchable-height #f]))
 
-(new button%
-     [parent button-panel]
-     [label "<<"]
-     [callback (lambda (button event)
-                 (set! movenum (sub1 movenum))
-                 (set! pieces (list-ref states movenum))
-                 (send message set-value (number->string movenum))
-                 (send my-canvas refresh-now))])
+;; (new button%
+;;      [parent button-panel]
+;;      [label "<<"]
+;;      [callback (lambda (button event)
+;;                  (set! movenum (sub1 movenum))
+;;                  (set! pieces (list-ref states movenum))
+;;                  (send message set-value (number->string movenum))
+;;                  (send my-canvas refresh-now))])
 
-(new button%
-     [parent button-panel]
-     [label ">>"]
-     [callback (lambda (button event)
-                 (set! movenum (add1 movenum))
-                 (set! pieces (list-ref states movenum))
-                 (send message set-value (number->string movenum))
-                 (send my-canvas refresh-now))])
+;; (new button%
+;;      [parent button-panel]
+;;      [label ">>"]
+;;      [callback (lambda (button event)
+;;                  (set! movenum (add1 movenum))
+;;                  (set! pieces (list-ref states movenum))
+;;                  (send message set-value (number->string movenum))
+;;                  (send my-canvas refresh-now))])
 
 (new button%
      [parent button-panel]
@@ -104,14 +127,14 @@
      [callback (lambda (button event)
                  (connect message))])
 
-(new choice%
-     [parent button-panel]
-     [label #f]
-     [choices '("alpha" "line" "magnetic" "mark" "motif" "usual" "utrecht")]
-     [selection 5]
-     [callback (lambda (choice event)
-                 (define selection (send choice get-string-selection))
-                 (set! piece-style selection)
-                 (send my-canvas refresh-now))])
+;; (new choice%
+;;      [parent button-panel]
+;;      [label #f]
+;;      [choices '("alpha" "line" "magnetic" "mark" "motif" "usual" "utrecht")]
+;;      [selection 5]
+;;      [callback (lambda (choice event)
+;;                  (define selection (send choice get-string-selection))
+;;                  (set! piece-style selection)
+;;                  (send my-canvas refresh-now))])
 
 (send frame show #t)
