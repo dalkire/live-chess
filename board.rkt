@@ -3,7 +3,7 @@
 (require racket/gui
          pict)
 
-(provide pos->squares index->row-col)
+(provide (all-defined-out))
 
 (define SQUARE-SIZE 100)
 (define SQUARES-PER-COL 8)
@@ -26,29 +26,44 @@
   (cond [(char-whitespace? ch) (filled-rectangle 0 0)]
         [else (inset (bitmap piece) padding)]))
 
+(define r (char->piece #\r))
+(define b (char->piece #\b))
+(define n (char->piece #\n))
+(define q (char->piece #\q))
+(define k (char->piece #\k))
+(define p (char->piece #\p))
+(define R (char->piece #\R))
+(define B (char->piece #\B))
+(define N (char->piece #\N))
+(define Q (char->piece #\Q))
+(define K (char->piece #\K))
+(define P (char->piece #\P))
+(define | | (char->piece #\space))
+
+(define w-square (filled-rectangle SQUARE-SIZE SQUARE-SIZE
+                    #:color (make-color 239 237 209)
+                    #:draw-border? #f))
+
+(define b-square (filled-rectangle SQUARE-SIZE SQUARE-SIZE
+                    #:color (make-color 120 150 86)
+                    #:draw-border? #f))
 
 ;; Get a square with the proper piece (or none)
 ;; given the board state and position (index in 64-element state string)
 (define (pos-sq state index)
   (cc-superimpose (index->square index)
-                  (char->piece (string-ref state index))))
+                  (eval (string->symbol (substring state index (add1 index))))))
 
 ;; From 64-char board state to list of composed squares
 (define (pos->squares state)
   (define piece-chars (string->list state))
-  (build-list (length piece-chars)
-              (lambda (i)
-                (pos-sq state i))))
+  (map (lambda (i)
+         (pos-sq state i))
+       (build-list 64 identity)))
 
 (define (color->square color)
-  (cond [(string=? color "white")
-         (filled-rectangle SQUARE-SIZE SQUARE-SIZE
-                    #:color (make-color 239 237 209)
-                    #:draw-border? #f)]
-        [else
-         (filled-rectangle SQUARE-SIZE SQUARE-SIZE
-                    #:color (make-color 120 150 86)
-                    #:draw-border? #f)]))
+  (cond [(string=? color "white") w-square]
+        [else b-square]))
 
 ;; Translate an index to the row-col values
 (define (index->row-col index)
