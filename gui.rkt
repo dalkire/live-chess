@@ -36,32 +36,18 @@
                            [min-width 400]
                            [stretchable-width #f]))
 
-;; (define (char->piece ch)
-;;   (define base (string-append "./pieces/" piece-style "/" piece-style "_"))
-;;   (define suffix ".png")
-;;   (define color-char
-;;     (cond [(char-lower-case? ch) "w"]
-;;           [(char-upper-case? ch) "b"]))
-;;   (define piece-char (string (char-downcase ch)))
-;;   (define piece (string-append base color-char piece-char suffix))
-;;   ;; (define piece (string-append piece-style "-" color-char piece-char))
-;;   ;; (inset (bitmap (eval (string->symbol piece))) padding)
-;;   (inset (bitmap piece) padding))
-
-
-;; (define (draw-pos row col sq-size dc)
-;;   (define y (* row sq-size))
-;;   (define x (* col sq-size))
-;;   (define sq
-;;     (cond [(even? (+ row col)) white-sq]
-;;           [else black-sq]))
-;;   (draw-square sq x y)
-;;   (unless (char))
-;;   (draw-piece ))
-
+(define my-canvas%
+  (class canvas%
+    (define/override (on-char key-event)
+      (cond
+        [(equal? (send key-event get-key-code) 'right)
+         (forward)]
+        [(equal? (send key-event get-key-code) 'left)
+         (backward)]))
+    (super-new)))
 
 (define my-canvas
-  (new canvas%
+  (new my-canvas%
        [parent board-panel]
        [style (list 'transparent)]
        [min-height (* square-size 8)]
@@ -76,6 +62,20 @@
                       (define x (* col square-size))
                       (draw-pict (list-ref (pos->squares pieces) i) dc x y))
                     (build-list 64 identity)))]))
+
+(define forward
+  (lambda ()
+    (when (< movenum (sub1 (length states)))
+      (set! movenum (add1 movenum))
+      (set! pieces (list-ref states movenum))
+      (send my-canvas refresh-now))))
+
+(define backward
+  (lambda ()
+    (when (> movenum 0)
+      (set! movenum (sub1 movenum))
+      (set! pieces (list-ref states movenum))
+      (send my-canvas refresh-now))))
 
 (define message (new text-field% [parent control-panel]
                      [label #f]
