@@ -29,12 +29,16 @@
                          [parent main-panel]
                          [min-width 800]
                          [min-height 800]))
-;; (draw-board board-panel)
 
 (define control-panel (new vertical-panel%
                            [parent main-panel]
                            [min-width 400]
                            [stretchable-width #f]))
+
+(define dragging #f)
+(define dragging-x 0)
+(define dragging-y 0)
+(define throttle 0)
 
 (define my-canvas%
   (class canvas%
@@ -44,6 +48,13 @@
          (forward)]
         [(equal? (send key-event get-key-code) 'left)
          (backward)]))
+    (define/override (on-event mouse-event)
+      (set! dragging (send mouse-event dragging?))
+      (set! throttle (add1 throttle))
+      (when (and dragging (= 0 (modulo throttle 8)))
+        (set! dragging-x (- (send mouse-event get-x) 50))
+        (set! dragging-y (- (send mouse-event get-y) 50))
+        (send this refresh-now)))
     (super-new)))
 
 (define my-canvas
@@ -60,7 +71,10 @@
                       (define-values (row col) (index->row-col i))
                       (define y (* row square-size))
                       (define x (* col square-size))
-                      (draw-pict (list-ref (pos->squares pieces) i) dc x y))
+                      (cond
+                        [(= i 3)
+                         (draw-pict (list-ref (pos->squares pieces) i) dc dragging-x dragging-y)]
+                        [else (draw-pict (list-ref (pos->squares pieces) i) dc x y)]))
                     (build-list 64 identity)))]))
 
 (define forward
@@ -77,12 +91,34 @@
       (set! pieces (list-ref states movenum))
       (send my-canvas refresh-now))))
 
-(define message (new text-field% [parent control-panel]
-                     [label #f]
-                     [style '(multiple)]
-                     [min-width 400]
-                     [stretchable-width #f]
-                     [init-value ""]))
+(define message
+  (new text-field%
+       [parent control-panel]
+       [label #f]
+       [style (list 'multiple)]
+       [min-width 400]
+       [min-height 700]
+       [stretchable-width #f]
+       [init-value ""]))
+
+(define prompt-panel
+  (new horizontal-panel%
+       [parent control-panel]))
+
+(define prompt
+  (new text-field%
+       [parent prompt-panel]
+       [label #f]
+       ;; [min-width 400]
+       ;; [stretchable-width #f]
+       [init-value ""]))
+
+(define prompt-button
+  (new button%
+       [parent prompt-panel]
+       [label "Send"]
+       [callback (lambda (button event)
+                   (print "prompt send"))]))
 
 (define button-panel (new horizontal-panel%
                           [parent control-panel]
@@ -119,8 +155,7 @@
      [choices '("alpha" "line" "magnetic" "mark" "motif" "usual" "utrecht")]
      [selection 5]
      [callback (lambda (choice event)
-                 (define selection (send choice get-string-selection))
-                 (set! piece-style selection)
+                 (select-piece-style choice)
                  (send my-canvas refresh-now))])
 
 (send frame show #t)

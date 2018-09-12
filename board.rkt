@@ -100,3 +100,8 @@
                       (define x (* col square-size))
                       (draw-pict (index->square index) dc x y))
                     (build-list 64 identity)))]))
+
+(define select-piece-style
+  (lambda (choice)
+    (define selection (send choice get-string-selection))
+    (set! piece-style selection)))
