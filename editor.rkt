@@ -16,35 +16,42 @@
 (send pb set-selection-visible #f)
 (send canvas set-editor pb)
 
-;; (define bb-dc
-;;   (new bitmap-dc%
-;;        [bitmap (read-bitmap "/home/dalkire/programming/racket/live-chess/pieces/alpha/alpha_bb.png")]))
+(define piece-snip%
+  (class image-snip%
+    (inherit set-flags get-flags)
+    (super-new)
+    (define/override (on-event dc x y editorx editory event)
+      (when (send event button-down? 'left)
+          (send pb set-before this #f)))
 
-;; (send pb on-paint #f bb-dc 30 30 200 200 10 10 'no-caret)
+    (define/public (set-img path)
+      (send this set-bitmap (read-bitmap path)))
 
-(define snip1
-  (make-object image-snip% (read-bitmap "/home/dalkire/programming/racket/live-chess/pieces/alpha/alpha_bb.png")))
+    (set-flags (cons 'handles-all-mouse-events (get-flags)))))
 
-(define snip2
-  (make-object image-snip% (read-bitmap "/home/dalkire/programming/racket/live-chess/pieces/alpha/alpha_br.png")))
+(define snip1 (new piece-snip%))
+(send snip1 set-img "/home/dalkire/programming/racket/live-chess/pieces/alpha/alpha_bb.png")
 
-(define snip3
-  (make-object image-snip% (read-bitmap "/home/dalkire/programming/racket/live-chess/pieces/alpha/alpha_bp.png")))
+(define snip2 (new piece-snip%))
+(send snip2 set-img "/home/dalkire/programming/racket/live-chess/pieces/alpha/alpha_br.png")
 
-(define snip4
-  (make-object image-snip% (read-bitmap "/home/dalkire/programming/racket/live-chess/pieces/alpha/alpha_bp.png")))
+(define snip3 (new piece-snip%))
+(send snip3 set-img "/home/dalkire/programming/racket/live-chess/pieces/alpha/alpha_bp.png")
 
-(define snip5
-  (make-object image-snip% (read-bitmap "/home/dalkire/programming/racket/live-chess/pieces/alpha/alpha_bp.png")))
+(define snip4 (new piece-snip%))
+(send snip4 set-img "/home/dalkire/programming/racket/live-chess/pieces/alpha/alpha_bp.png")
 
-(define snip6
-  (make-object image-snip% (read-bitmap "/home/dalkire/programming/racket/live-chess/pieces/alpha/alpha_bp.png")))
+(define snip5 (new piece-snip%))
+(send snip5 set-img "/home/dalkire/programming/racket/live-chess/pieces/alpha/alpha_bp.png")
 
-(define snip7
-  (make-object image-snip% (read-bitmap "/home/dalkire/programming/racket/live-chess/pieces/alpha/alpha_bp.png")))
+(define snip6 (new piece-snip%))
+(send snip6 set-img "/home/dalkire/programming/racket/live-chess/pieces/alpha/alpha_bp.png")
 
-(define snip8
-  (make-object image-snip% (read-bitmap "/home/dalkire/programming/racket/live-chess/pieces/alpha/alpha_bp.png")))
+(define snip7 (new piece-snip%))
+(send snip7 set-img "/home/dalkire/programming/racket/live-chess/pieces/alpha/alpha_bp.png")
+
+(define snip8 (new piece-snip%))
+(send snip8 set-img "/home/dalkire/programming/racket/live-chess/pieces/alpha/alpha_bp.png")
 
 (send pb insert snip1 0 0)
 (send pb insert snip2 80 0)
@@ -54,7 +61,5 @@
 (send pb insert snip6 400 0)
 (send pb insert snip7 480 0)
 (send pb insert snip8 560 0)
-
-(send pb set-before snip8 #f)
 
 (send frame show #t)
