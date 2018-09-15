@@ -1,7 +1,6 @@
 #lang racket
 
-(require racket/gui
-         racket/draw)
+(require racket/gui)
 
 (define frame
   (new frame%
@@ -12,22 +11,27 @@
 (define canvas
   (new editor-canvas% [parent frame]))
 
-(define pb (new pasteboard%))
+(define my-pb%
+  (class pasteboard%
+    (inherit set-before)
+    (super-new)
+
+    (define (after-select snip on?)
+      (when on?
+        (set-before snip #f)))
+
+    (augment after-select)))
+
+(define pb (new my-pb%))
 (send pb set-selection-visible #f)
 (send canvas set-editor pb)
 
 (define piece-snip%
   (class image-snip%
-    (inherit set-flags get-flags)
     (super-new)
-    (define/override (on-event dc x y editorx editory event)
-      (when (send event button-down? 'left)
-          (send pb set-before this #f)))
 
     (define/public (set-img path)
-      (send this set-bitmap (read-bitmap path)))
-
-    (set-flags (cons 'handles-all-mouse-events (get-flags)))))
+      (send this set-bitmap (read-bitmap path)))))
 
 (define snip1 (new piece-snip%))
 (send snip1 set-img "/home/dalkire/programming/racket/live-chess/pieces/alpha/alpha_bb.png")
