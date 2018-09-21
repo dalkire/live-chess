@@ -29,11 +29,8 @@
     (define (after-move-to snip x y dragging?)
       (unless dragging?
           (printf "after-move-to (~a, ~a) ~a ~a\n" x y snip dragging?)
-          (print "is this snip a piece? ")
-          (println (is-a? snip piece-snip%))
-          (if (is-a? snip piece-snip%)
-              (move-to snip 400 400)
-              (move-to snip 0 0))))
+          (when (is-a? snip piece-snip%)
+            (move-to snip (- x (modulo x 80)) (- y (modulo y 80))))))
 
     (augment after-select after-move-to)))
 
@@ -43,31 +40,48 @@
 
 (define piece-snip%
   (class image-snip%
-    (inherit get-flags set-flags set-bitmap)
+    (inherit get-flags set-flags set-bitmap resize)
     (super-new)
 
     (define/public (set-img path)
       (set-bitmap (read-bitmap path)))
 
+    (resize 80 80)
     (set-flags (cons 'handles-all-mouse-events (get-flags)))))
 
-(define snip01 (make-object piece-snip% "./pieces/alpha/alpha_br.png" 'png/alpha #t))
-(define snip02 (make-object piece-snip% "./pieces/alpha/alpha_bb.png" 'png/alpha #t))
-(define snip03 (make-object piece-snip% "./pieces/alpha/alpha_bn.png" 'png/alpha #t))
-(define snip04 (make-object piece-snip% "./pieces/alpha/alpha_bq.png" 'png/alpha #t))
-(define snip05 (make-object piece-snip% "./pieces/alpha/alpha_bk.png" 'png/alpha #t))
-(define snip06 (make-object piece-snip% "./pieces/alpha/alpha_bn.png" 'png/alpha #t))
-(define snip07 (make-object piece-snip% "./pieces/alpha/alpha_bb.png" 'png/alpha #t))
-(define snip08 (make-object piece-snip% "./pieces/alpha/alpha_br.png" 'png/alpha #t))
+(define snip01
+  (make-object piece-snip% "./pieces/alpha/alpha_br.png" 'png/alpha #t))
+(define snip02
+  (make-object piece-snip% "./pieces/alpha/alpha_bn.png" 'png/alpha #t))
+(define snip03
+  (make-object piece-snip% "./pieces/alpha/alpha_bb.png" 'png/alpha #t))
+(define snip04
+  (make-object piece-snip% "./pieces/alpha/alpha_bq.png" 'png/alpha #t))
+(define snip05
+  (make-object piece-snip% "./pieces/alpha/alpha_bk.png" 'png/alpha #t))
+(define snip06
+  (make-object piece-snip% "./pieces/alpha/alpha_bb.png" 'png/alpha #t))
+(define snip07
+  (make-object piece-snip% "./pieces/alpha/alpha_bn.png" 'png/alpha #t))
+(define snip08
+  (make-object piece-snip% "./pieces/alpha/alpha_br.png" 'png/alpha #t))
 
-(define snip09 (make-object piece-snip% "./pieces/alpha/alpha_bp.png" 'png/alpha #t))
-(define snip10 (make-object piece-snip% "./pieces/alpha/alpha_bp.png" 'png/alpha #t))
-(define snip11 (make-object piece-snip% "./pieces/alpha/alpha_bp.png" 'png/alpha #t))
-(define snip12 (make-object piece-snip% "./pieces/alpha/alpha_bp.png" 'png/alpha #t))
-(define snip13 (make-object piece-snip% "./pieces/alpha/alpha_bp.png" 'png/alpha #t))
-(define snip14 (make-object piece-snip% "./pieces/alpha/alpha_bp.png" 'png/alpha #t))
-(define snip15 (make-object piece-snip% "./pieces/alpha/alpha_bp.png" 'png/alpha #t))
-(define snip16 (make-object piece-snip% "./pieces/alpha/alpha_bp.png" 'png/alpha #t))
+(define snip09
+  (make-object piece-snip% "./pieces/alpha/alpha_bp.png" 'png/alpha #t))
+(define snip10
+  (make-object piece-snip% "./pieces/alpha/alpha_bp.png" 'png/alpha #t))
+(define snip11
+  (make-object piece-snip% "./pieces/alpha/alpha_bp.png" 'png/alpha #t))
+(define snip12
+  (make-object piece-snip% "./pieces/alpha/alpha_bp.png" 'png/alpha #t))
+(define snip13
+  (make-object piece-snip% "./pieces/alpha/alpha_bp.png" 'png/alpha #t))
+(define snip14
+  (make-object piece-snip% "./pieces/alpha/alpha_bp.png" 'png/alpha #t))
+(define snip15
+  (make-object piece-snip% "./pieces/alpha/alpha_bp.png" 'png/alpha #t))
+(define snip16
+  (make-object piece-snip% "./pieces/alpha/alpha_bp.png" 'png/alpha #t))
 
 (send pb insert snip01 0 0)
 (send pb insert snip02 80 0)
@@ -87,23 +101,39 @@
 (send pb insert snip15 480 80)
 (send pb insert snip16 560 80)
 
-(define snip17 (make-object piece-snip% "./pieces/alpha/alpha_wp.png" 'png/alpha #t))
-(define snip18 (make-object piece-snip% "./pieces/alpha/alpha_wp.png" 'png/alpha #t))
-(define snip19 (make-object piece-snip% "./pieces/alpha/alpha_wp.png" 'png/alpha #t))
-(define snip20 (make-object piece-snip% "./pieces/alpha/alpha_wp.png" 'png/alpha #t))
-(define snip21 (make-object piece-snip% "./pieces/alpha/alpha_wp.png" 'png/alpha #t))
-(define snip22 (make-object piece-snip% "./pieces/alpha/alpha_wp.png" 'png/alpha #t))
-(define snip23 (make-object piece-snip% "./pieces/alpha/alpha_wp.png" 'png/alpha #t))
-(define snip24 (make-object piece-snip% "./pieces/alpha/alpha_wp.png" 'png/alpha #t))
+(define snip17
+  (make-object piece-snip% "./pieces/alpha/alpha_wp.png" 'png/alpha #t))
+(define snip18
+  (make-object piece-snip% "./pieces/alpha/alpha_wp.png" 'png/alpha #t))
+(define snip19
+  (make-object piece-snip% "./pieces/alpha/alpha_wp.png" 'png/alpha #t))
+(define snip20
+  (make-object piece-snip% "./pieces/alpha/alpha_wp.png" 'png/alpha #t))
+(define snip21
+  (make-object piece-snip% "./pieces/alpha/alpha_wp.png" 'png/alpha #t))
+(define snip22
+  (make-object piece-snip% "./pieces/alpha/alpha_wp.png" 'png/alpha #t))
+(define snip23
+  (make-object piece-snip% "./pieces/alpha/alpha_wp.png" 'png/alpha #t))
+(define snip24
+  (make-object piece-snip% "./pieces/alpha/alpha_wp.png" 'png/alpha #t))
 
-(define snip25 (make-object piece-snip% "./pieces/alpha/alpha_wr.png" 'png/alpha #t))
-(define snip26 (make-object piece-snip% "./pieces/alpha/alpha_wb.png" 'png/alpha #t))
-(define snip27 (make-object piece-snip% "./pieces/alpha/alpha_wn.png" 'png/alpha #t))
-(define snip28 (make-object piece-snip% "./pieces/alpha/alpha_wq.png" 'png/alpha #t))
-(define snip29 (make-object piece-snip% "./pieces/alpha/alpha_wk.png" 'png/alpha #t))
-(define snip30 (make-object piece-snip% "./pieces/alpha/alpha_wn.png" 'png/alpha #t))
-(define snip31 (make-object piece-snip% "./pieces/alpha/alpha_wb.png" 'png/alpha #t))
-(define snip32 (make-object piece-snip% "./pieces/alpha/alpha_wr.png" 'png/alpha #t))
+(define snip25
+  (make-object piece-snip% "./pieces/alpha/alpha_wr.png" 'png/alpha #t))
+(define snip26
+  (make-object piece-snip% "./pieces/alpha/alpha_wn.png" 'png/alpha #t))
+(define snip27
+  (make-object piece-snip% "./pieces/alpha/alpha_wb.png" 'png/alpha #t))
+(define snip28
+  (make-object piece-snip% "./pieces/alpha/alpha_wq.png" 'png/alpha #t))
+(define snip29
+  (make-object piece-snip% "./pieces/alpha/alpha_wk.png" 'png/alpha #t))
+(define snip30
+  (make-object piece-snip% "./pieces/alpha/alpha_wb.png" 'png/alpha #t))
+(define snip31
+  (make-object piece-snip% "./pieces/alpha/alpha_wn.png" 'png/alpha #t))
+(define snip32
+  (make-object piece-snip% "./pieces/alpha/alpha_wr.png" 'png/alpha #t))
 
 (send pb insert snip17 0 480)
 (send pb insert snip18 80 480)
