@@ -1,6 +1,7 @@
 #lang racket
 
-(require racket/gui)
+(require racket/gui
+         "lib.rkt")
 
 (define frame
   (new frame%
@@ -30,7 +31,8 @@
       (unless dragging?
           (printf "after-move-to (~a, ~a) ~a ~a\n" x y snip dragging?)
           (when (is-a? snip piece-snip%)
-            (move-to snip (- x (modulo x 80)) (- y (modulo y 80))))))
+            (let ((snap-pt (snap-to (pt (exact-floor x) (exact-floor y)) 80)))
+              (move-to snip (pt-x snap-pt) (pt-y snap-pt))))))
 
     (augment after-select after-move-to)))
 
