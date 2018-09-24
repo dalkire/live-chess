@@ -81,7 +81,7 @@
 (: pt-part->square-index (-> Positive-Integer Positive-Integer RowOrColumn))
 (define (pt-part->square-index pt-part square-size)
   (let ((index (add1 (quotient pt-part square-size))))
-    (if (> index (* 8 square-size))
+    (if (> index 8)
         (cast 8 RowOrColumn)
         (cast index RowOrColumn))))
 
@@ -97,10 +97,22 @@
   (let ((anchor (- (char->integer #\1) 1)))
     (cast (integer->char (+ anchor row)) RowChar)))
 
-(: snap-to (-> pt Positive-Integer pt))
-(define (snap-to p square-size)
-  (let ((x (pt-x p))
-        (y (pt-y p)))
-    (pt (cast (- x (modulo x square-size)) Positive-Integer)
-        (cast (- y (modulo y square-size)) Positive-Integer))))
+;; Given separate characters for column and row, convert to square string
+(: column-row-chars->square-string (-> ColumnChar RowChar SquareString))
+(define (column-row-chars->square-string column-char row-char)
+  (cast (string column-char row-char) SquareString))
 
+;; Translates a valid square string into a square symbol
+(: square-string->square (-> SquareString Square))
+(define (square-string->square square-string)
+  (cast (string->symbol square-string) Square))
+
+;; Given a point and a square size, converts that point to a valid square symbol
+(: pt->square (-> pt Positive-Integer Square))
+(define (pt->square p square-size)
+  (let ((column-char (column->column-char
+                      (pt-part->square-index (pt-x p) square-size)))
+        (row-char (row->row-char
+                   (pt-part->square-index (pt-y p) square-size))))
+    (square-string->square
+     (column-row-chars->square-string column-char row-char))))
