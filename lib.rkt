@@ -1,9 +1,11 @@
 #lang typed/racket
 
-(provide snap-to
-         (struct-out pt))
+(provide (struct-out pt)
+         (struct-out coord))
 
 (struct pt ([x : Positive-Integer] [y : Positive-Integer]))
+
+(struct coord ([column : Column] [row : Row]))
 
 (define-type Square (U 'a8 'b8 'c8 'd8 'e8 'f8 'g8 'h8
                        'a7 'b7 'c7 'd7 'e7 'f7 'g7 'h7
@@ -29,11 +31,12 @@
 (define-type Row RowOrColumn)
 (define-type RowChar (U #\1 #\2 #\3 #\4 #\5 #\6 #\7 #\8))
 
+
 ;; Translates a valid square symbol into the point that defines its origin
 ;; at the top-left of the given square
-(: square->pt (-> Square pt))
-(define (square->pt sq)
-  (pt (square->column sq) (square->row sq)))
+(: square->coord (-> Square coord))
+(define (square->coord sq)
+  (coord (square->column sq) (square->row sq)))
 
 ;; Given a valid square symbol, returns its row integer
 (: square->row (-> Square Row))
@@ -67,8 +70,8 @@
 ;; Translates a character representing a row into a row integer
 (: row-char->row (-> RowChar Row))
 (define (row-char->row row-char)
-   (let ((anchor (- (char->integer #\1) 1)))
-     (cast (- (char->integer row-char) anchor) Row)))
+  (let ((anchor (- (char->integer #\1) 1)))
+    (cast (- (char->integer row-char) anchor) Row)))
 
 ;; Translates a character representing a column into a column integer
 (: column-char->column (-> ColumnChar Column))
