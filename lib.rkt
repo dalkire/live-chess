@@ -125,12 +125,35 @@
     (square-string->square
      (column-row-chars->square-string column-char row-char))))
 
-;; (: square->piece (-> Square String Piece))
-;; (define (square->piece sq board-string))
+(: square->piece (-> Square String Char))
+(define (square->piece sq board-string)
+  (string-ref board-string (square->index sq)))
 
-
+;; Given a square symbol, what is that square's index in the 64-element string representation
 (: square->index (-> Square Integer))
 (define (square->index sq)
   (+
-   (* (- (square->row sq) 1) 8)
+   (* (- 8 (square->row sq)) 8)
    (- (square->column sq) 1)))
+
+;; Translate in index of a 64-element string representation of a board into its square symbol
+(: index->square (-> Integer Square))
+(define (index->square index)
+  (coord->square
+   (index->coord index)))
+
+;; Translate in index of a 64-element string representation of a board into a coord struct
+(: index->coord (-> Integer coord))
+(define (index->coord index)
+  (let ((column (cast (+ 1 (modulo index 8)) Column))
+        (row (cast (- 8 (floor (/ index 8))) Row)))
+    (coord column row)))
+
+;; Convert a coord struct into a square symbol
+(: coord->square (-> coord Square))
+(define (coord->square coord)
+  (square-string->square
+   (cast
+    (string (column->column-char (coord-column coord))
+            (row->row-char (coord-row coord)))
+    SquareString)))
