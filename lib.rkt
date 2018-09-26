@@ -5,6 +5,10 @@
 (provide (struct-out pt)
          (struct-out coord))
 
+(struct None ())
+(struct (a) Some ([v : a]))
+(define-type (Maybe a) (U None (Some a)))
+
 (struct pt ([x : Positive-Integer] [y : Positive-Integer]))
 
 (struct coord ([column : Column] [row : Row]))
@@ -27,8 +31,13 @@
                              "a2" "b2" "c2" "d2" "e2" "f2" "g2" "h2"
                              "a1" "b1" "c1" "d1" "e1" "f1" "g1" "h1"))
 
+(define-type PieceChar (U #\p #\n #\b #\r #\q #\k
+                          #\P #\N #\B #\R #\Q #\K
+                          #\space))
+
 (define-type Piece (U 'wp 'wn 'wb 'wr 'wq 'wk
-                      'bp 'bn 'bb 'br 'bq 'bk))
+                      'bp 'bn 'bb 'br 'bq 'bk
+                      'none))
 
 (define-type RowOrColumn (U 1 2 3 4 5 6 7 8))
 (define-type Column RowOrColumn)
@@ -125,24 +134,44 @@
     (square-string->square
      (column-row-chars->square-string column-char row-char))))
 
-(: square->piece (-> Square String Char))
+;; Given a square and the string state of the board, return the piece on that
+;; square
+(: square->piece (-> Square String (Maybe Piece)))
 (define (square->piece sq board-string)
-  (string-ref board-string (square->index sq)))
+  (let ((char-at-index (string-ref board-string (square->index sq))))
+    (if (equal? char-at-index #\space)
+        (None)
+        (Some (piece-char->piece (cast char-at-index PieceChar))))))
 
-;; Given a square symbol, what is that square's index in the 64-element string representation
+;; Translate a piece-char (black pieces are uppercase, white lower) to a piece
+;; symbol
+(: piece-char->piece (-> PieceChar Piece))
+(define (piece-char->piece piece-char)
+  (if (char-upper-case? piece-char)
+      (cast
+       (string->symbol (string #\b (char-downcase piece-char)))
+       Piece)
+      (cast
+       (string->symbol (string #\w piece-char))
+       Piece)))
+
+;; Given a square symbol, what is that square's index in the 64-element string
+;; representation
 (: square->index (-> Square Integer))
 (define (square->index sq)
   (+
    (* (- 8 (square->row sq)) 8)
    (- (square->column sq) 1)))
 
-;; Translate in index of a 64-element string representation of a board into its square symbol
+;; Translate in index of a 64-element string representation of a board into its
+;; square symbol
 (: index->square (-> Integer Square))
 (define (index->square index)
   (coord->square
    (index->coord index)))
 
-;; Translate in index of a 64-element string representation of a board into a coord struct
+;; Translate in index of a 64-element string representation of a board into a
+;; coord struct
 (: index->coord (-> Integer coord))
 (define (index->coord index)
   (let ((column (cast (+ 1 (modulo index 8)) Column))
