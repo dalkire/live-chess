@@ -53,10 +53,10 @@
   (coord->pt (square->coord sq) square-size))
 
 (: coord->pt (-> coord Natural pt))
-(define (coord->pt coord square-size)
-  (pt (* (cast (- (coord-column coord) 1) Natural)
+(define (coord->pt c square-size)
+  (pt (* (cast (- (coord-column c) 1) Natural)
          square-size)
-      (* (cast (- 8 (coord-row coord)) Natural)
+      (* (cast (- 8 (coord-row c)) Natural)
          square-size)))
 
 (: pt->coord (-> pt Natural coord))
@@ -109,14 +109,23 @@
    (let ((anchor (- (char->integer #\a) 1)))
      (cast (- (char->integer column-char) anchor) Column)))
 
-;; Translates an x or y position to an integer value that represents
-;; the row or column value somewhere from 1 to 8
-(: pt-part->square-index (-> Natural Natural RowOrColumn))
-(define (pt-part->square-index pt-part square-size)
-  (let ((index (add1 (quotient pt-part square-size))))
+;; Translates an y position to an integer value that represents
+;; the column value. An integer between 1 and 8
+(: pt-column->square-index (-> Natural Natural RowOrColumn))
+(define (pt-column->square-index pt-column square-size)
+  (let ((index (add1 (quotient pt-column square-size))))
     (if (> index 8)
-        (cast 8 RowOrColumn)
-        (cast index RowOrColumn))))
+        (cast 8 Column)
+        (cast index Column))))
+
+;; Translates a x position to an integer value that represents
+;; the row value. An integer between 1 and 8
+(: pt-row->square-index (-> Natural Natural RowOrColumn))
+(define (pt-row->square-index pt-row square-size)
+  (let ((index (- 8 (quotient pt-row square-size))))
+    (if (> index 8)
+        (cast 8 Row)
+        (cast index Row))))
 
 ;; Translate the point of a square's origin (upper-left) to its center
 (: square-origin->square->center (-> pt Natural pt))
@@ -156,9 +165,9 @@
 (: pt->square (-> pt Natural Square))
 (define (pt->square p square-size)
   (let ((column-char (column->column-char
-                      (pt-part->square-index (pt-x p) square-size)))
+                      (pt-column->square-index (pt-x p) square-size)))
         (row-char (row->row-char
-                   (pt-part->square-index (pt-y p) square-size))))
+                   (pt-row->square-index (pt-y p) square-size))))
     (square-string->square
      (column-row-chars->square-string column-char row-char))))
 
