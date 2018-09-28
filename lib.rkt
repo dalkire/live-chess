@@ -6,12 +6,12 @@
          (struct-out coord))
 
 (struct None ())
-(struct (a) Some ([v : a]))
+(struct (a) Some ([v : a]) #:transparent)
 (define-type (Maybe a) (U None (Some a)))
 
-(struct pt ([x : Positive-Integer] [y : Positive-Integer]))
+(struct pt ([x : Natural] [y : Natural]) #:transparent)
 
-(struct coord ([column : Column] [row : Row]))
+(struct coord ([column : Column] [row : Row]) #:transparent)
 
 (define-type Square (U 'a8 'b8 'c8 'd8 'e8 'f8 'g8 'h8
                        'a7 'b7 'c7 'd7 'e7 'f7 'g7 'h7
@@ -48,6 +48,22 @@
 
 ;; Translates a valid square symbol into the point that defines its origin
 ;; at the top-left of the given square
+(: square->pt (-> Square Natural pt))
+(define (square->pt sq square-size)
+  (coord->pt (square->coord sq) square-size))
+
+(: coord->pt (-> coord Natural pt))
+(define (coord->pt coord square-size)
+  (pt (* (cast (- (coord-column coord) 1) Natural)
+         square-size)
+      (* (cast (- 8 (coord-row coord)) Natural)
+         square-size)))
+
+(: pt->coord (-> pt Natural coord))
+(define (pt->coord p square-size)
+  (square->coord (pt->square p square-size)))
+
+;; Translates a valid square symbol into it's column and row coordinates
 (: square->coord (-> Square coord))
 (define (square->coord sq)
   (coord (square->column sq) (square->row sq)))
@@ -95,12 +111,24 @@
 
 ;; Translates an x or y position to an integer value that represents
 ;; the row or column value somewhere from 1 to 8
-(: pt-part->square-index (-> Positive-Integer Positive-Integer RowOrColumn))
+(: pt-part->square-index (-> Natural Natural RowOrColumn))
 (define (pt-part->square-index pt-part square-size)
   (let ((index (add1 (quotient pt-part square-size))))
     (if (> index 8)
         (cast 8 RowOrColumn)
         (cast index RowOrColumn))))
+
+;; Translate the point of a square's origin (upper-left) to its center
+(: square-origin->square->center (-> pt Natural pt))
+(define (square-origin->square->center origin square-size)
+  (pt (cast (+ (pt-x origin) (quotient square-size 2)) Natural)
+      (cast (+ (pt-y origin) (quotient square-size 2)) Natural)))
+
+;; Translate the point of a square's center to its center (upper-left)
+(: square-center->square->origin (-> pt Natural pt))
+(define (square-center->square->origin center square-size)
+  (pt (cast (- (pt-x center) (quotient square-size 2)) Natural)
+      (cast (- (pt-y center) (quotient square-size 2)) Natural)))
 
 ;; Translates a column value from 1 to 8 into a column character from #\a to #\h
 (: column->column-char (-> Column ColumnChar))
@@ -125,7 +153,7 @@
   (cast (string->symbol square-string) Square))
 
 ;; Given a point and a square size, converts that point to a valid square symbol
-(: pt->square (-> pt Positive-Integer Square))
+(: pt->square (-> pt Natural Square))
 (define (pt->square p square-size)
   (let ((column-char (column->column-char
                       (pt-part->square-index (pt-x p) square-size)))
