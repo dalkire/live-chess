@@ -243,3 +243,11 @@
     (string (column->column-char (coord-column coord))
             (row->row-char (coord-row coord)))
     SquareString)))
+
+;; Whether the move is a legal one (currenly only concerned with the destination
+;; being an empty square)
+(: legal-move? (-> Square Square String Boolean))
+(define (legal-move? orig dest board-string)
+  (match (square->piece dest board-string)
+    [(Some piece) #f]
+    [(None) #t]))
