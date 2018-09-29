@@ -3,15 +3,29 @@
 (define POS "RNBQKB RPPPP PPP     N      P      p        p   ppp  ppprnbqkbnr")
 
 (provide (struct-out pt)
-         (struct-out coord))
+         (struct-out coord)
+         snap-to)
 
 (struct None ())
-(struct (a) Some ([v : a]) #:transparent)
+(struct (a) Some ([v : a])
+  #:transparent)
 (define-type (Maybe a) (U None (Some a)))
 
-(struct pt ([x : Natural] [y : Natural]) #:transparent)
+(struct pt ([x : Natural]
+            [y : Natural])
+  #:transparent)
 
-(struct coord ([column : Column] [row : Row]) #:transparent)
+(struct Board ([position : String]
+               [square-size : Positive-Integer]
+               [squares-per-row : Positive-Integer]
+               [squares-per-column : Positive-Integer])
+  #:transparent)
+
+(struct coord ([column : Column]
+               [row : Row])
+  #:transparent)
+
+(define board (Board POS 80 8 8))
 
 (define-type Square (U 'a8 'b8 'c8 'd8 'e8 'f8 'g8 'h8
                        'a7 'b7 'c7 'd7 'e7 'f7 'g7 'h7
@@ -117,6 +131,12 @@
     (if (> index 8)
         (cast 8 Column)
         (cast index Column))))
+
+(: snap-to (-> pt Natural pt))
+(define (snap-to p square-size)
+  (coord->pt
+   (pt->coord
+    (square-origin->square->center p square-size) square-size) square-size))
 
 ;; Translates a x position to an integer value that represents
 ;; the row value. An integer between 1 and 8
