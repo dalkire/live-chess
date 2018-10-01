@@ -3,6 +3,8 @@
 (require racket/gui
          "lib.rkt")
 
+(define POS "RNBQKB RPPPP PPP     N      P      p        p   ppp  ppprnbqkbnr")
+
 (define frame
   (new frame%
        [label "dalkire"]
@@ -84,6 +86,24 @@
   (make-object piece-snip% "./pieces/alpha/alpha_bp.png" 'png/alpha #t))
 (define snip16
   (make-object piece-snip% "./pieces/alpha/alpha_bp.png" 'png/alpha #t))
+
+
+(define (set-board board board-string)
+  (map char->snip
+       (string->list board-string)))
+
+(define (char->snip char)
+  (make-object piece-snip% "./pieces/alpha/alpha_bp.png" 'png/alpha #t))
+
+;; Should be the state of the board. A hash of square symbol keys to piece struct
+;; values
+(define (board-hash pos)
+  (make-hash
+   (map (lambda (index)
+          (let ((square (index->square index)))
+            (cons square (square->piece square pos))))
+       (build-list 64 values))))
+
 
 (send pb insert snip01 0 0)
 (send pb insert snip02 80 0)

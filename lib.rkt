@@ -4,7 +4,12 @@
 
 (provide (struct-out pt)
          (struct-out coord)
-         snap-to)
+         snap-to
+         legal-move?
+         pt->square
+         index->square
+         unwrap-piece
+         square->piece)
 
 (struct None ())
 (struct (a) Some ([v : a])
@@ -251,3 +256,8 @@
   (match (square->piece dest board-string)
     [(Some piece) #f]
     [(None) #t]))
+
+(define (unwrap-piece maybe-piece)
+  (match maybe-piece
+    [(Some piece) piece]
+    [_ #f]))
