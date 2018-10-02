@@ -97,6 +97,16 @@
       (unless (equal? piece-snip #f)
         (send pb move-to piece-snip (pt-x p2) (pt-y p2))))))
 
+;; Attempting to build a differ (extract move from two positions)
+(define (diff pos1 pos2)
+  (foldl (lambda (p1 p2 result)
+           (string-append result (string p1) "-" (string p2) "\n"))
+         ""
+         (string->list POS1)
+         (string->list POS2)))
+
+;; This function should generate a new position string when given the initial
+;; position string and a src-square/dest-square string
 ;; (string-append
 ;;              (substring POS1 0 3)
 ;;              " "
