@@ -4,12 +4,17 @@
 
 (provide (struct-out pt)
          (struct-out coord)
+         (struct-out Some)
+         (struct-out None)
          snap-to
          legal-move?
          pt->square
+         square->pt
          index->square
+         square->index
          unwrap-piece
-         square->piece)
+         square->piece
+         square-origin->square-center)
 
 (struct None ())
 (struct (a) Some ([v : a])
@@ -141,7 +146,7 @@
 (define (snap-to p square-size)
   (coord->pt
    (pt->coord
-    (square-origin->square->center p square-size) square-size) square-size))
+    (square-origin->square-center p square-size) square-size) square-size))
 
 ;; Translates a x position to an integer value that represents
 ;; the row value. An integer between 1 and 8
@@ -153,8 +158,8 @@
         (cast index Row))))
 
 ;; Translate the point of a square's origin (upper-left) to its center
-(: square-origin->square->center (-> pt Natural pt))
-(define (square-origin->square->center origin square-size)
+(: square-origin->square-center (-> pt Natural pt))
+(define (square-origin->square-center origin square-size)
   (pt (cast (+ (pt-x origin) (quotient square-size 2)) Natural)
       (cast (+ (pt-y origin) (quotient square-size 2)) Natural)))
 
