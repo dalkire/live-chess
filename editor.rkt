@@ -100,20 +100,29 @@
 ;; Attempting to build a differ (extract move from two positions)
 (define (diff pos1 pos2)
   (foldl (lambda (p1 p2 result)
-           (string-append result (string p1) "-" (string p2) "\n"))
-         ""
+           (let ((index (first result)))
+             (if (equal? p1 p2)
+                 (list (add1 index) (second result))
+                 (list (add1 index)
+                       (cons
+                        (list (index->square index) p1 p2)
+                        (second result))))))
+         (list 0 empty)
          (string->list POS1)
          (string->list POS2)))
 
 ;; This function should generate a new position string when given the initial
 ;; position string and a src-square/dest-square string
-;; (string-append
-;;              (substring POS1 0 3)
-;;              " "
-;;              (substring POS1 4 17)
-;;              "Q"
-;;              (substring POS1 18))
+(define (move->pos move curr-pos)
+  (let ((src-index (square->index
+                    (string->symbol (substring move 0 2))))
+        (dest-index (square->index
+                     (string->symbol (substring move 2 4))))
+        (new-pos (substring curr-pos 0)))
+    (string-set! new-pos src-index #\space)
+    (string-set! new-pos dest-index (string-ref curr-pos src-index))
+    new-pos))
 
 (update-board pb (board-hash POS1))
 
-(send frame show #t)
+;; (send frame show #t)

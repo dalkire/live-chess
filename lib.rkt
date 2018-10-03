@@ -2,19 +2,20 @@
 
 (define POS "RNBQKB RPPPP PPP     N      P      p        p   ppp  ppprnbqkbnr")
 
-(provide (struct-out pt)
-         (struct-out coord)
-         (struct-out Some)
-         (struct-out None)
-         snap-to
-         legal-move?
-         pt->square
-         square->pt
-         index->square
-         square->index
-         unwrap-piece
-         square->piece
-         square-origin->square-center)
+(provide (all-defined-out))
+         ;; (struct-out pt)
+         ;; (struct-out coord)
+         ;; (struct-out Some)
+         ;; (struct-out None)
+         ;; snap-to
+         ;; legal-move?
+         ;; pt->square
+         ;; square->pt
+         ;; index->square
+         ;; square->index
+         ;; unwrap-piece
+         ;; square->piece
+         ;; square-origin->square-center)
 
 (struct None ())
 (struct (a) Some ([v : a])
