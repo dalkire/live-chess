@@ -125,4 +125,4 @@
 
 (update-board pb (board-hash POS1))
 
-;; (send frame show #t)
+(send frame show #t)
