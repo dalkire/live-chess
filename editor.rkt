@@ -1,10 +1,13 @@
 #lang racket
 
 (require racket/gui
-         "lib.rkt")
+         "lib.rkt"
+         "game.rkt")
 
 (define POS1 "RNBQKBNRPPPP PPP            P      p        p   ppp  ppprnbqkbnr")
 (define POS2 "RNBQKB RPPPP PPP     N      P      p        p   ppp  ppprnbqkbnr")
+
+(define curr-index 0)
 
 (define frame
   (new frame%
@@ -12,8 +15,32 @@
        [width 700]
        [height 700]))
 
+(define my-canvas%
+  (class editor-canvas%
+    (define/override (on-char key-event)
+      (cond
+        [(equal? (send key-event get-key-code) 'right)
+         (forward)]
+        [(equal? (send key-event get-key-code) 'left)
+         (backward)]))
+    (super-new)))
+
+(define (forward)
+  (let ((move-pair (diff (list-ref game-list curr-index)
+                         (list-ref game-list (add1 curr-index)))))
+    (move pb (car move-pair) (cdr move-pair)))
+  (set! curr-index (add1 curr-index)))
+  ;; (draw-board))
+
+(define (backward)
+  (let ((move-pair (diff (list-ref game-list curr-index)
+                         (list-ref game-list (sub1 curr-index)))))
+    (move pb (car move-pair) (cdr move-pair)))
+  (set! curr-index (sub1 curr-index)))
+  ;; (draw-board))
+
 (define canvas
-  (new editor-canvas% [parent frame]))
+  (new my-canvas% [parent frame]))
 
 (define board (read-bitmap "./boards/board_pinstripes.png"))
 
@@ -77,7 +104,9 @@
                    (let ((x (pt-x (square->pt square 80)))
                          (y (pt-y (square->pt square 80))))
                        (match maybe-piece
-                         [(Some piece) (send pb insert (piece->snip piece) x y)]
+                         [(Some piece)
+                          ;; (send pb remove (send pb find-snip x y))
+                          (send pb insert (piece->snip piece) x y)]
                          [(None) void])))))
 
 (define (piece->snip piece)
@@ -91,25 +120,37 @@
   (let ((p1 (square-origin->square-center (square->pt src-square 80) 80))
         (p2 (square->pt dest-square 80)))
     (let ((dest-snip (send pb find-snip (pt-x p2) (pt-y p2)))
-          (piece-snip (send pb find-snip (pt-x p1) (pt-y p1))))
-      (unless (equal? dest-snip #f)
+          (src-snip (send pb find-snip (pt-x p1) (pt-y p1))))
+      (when dest-snip
         (send pb delete dest-snip))
-      (unless (equal? piece-snip #f)
-        (send pb move-to piece-snip (pt-x p2) (pt-y p2))))))
+      (when src-snip
+        (send pb move-to src-snip (pt-x p2) (pt-y p2))))))
 
 ;; Attempting to build a differ (extract move from two positions)
 (define (diff pos1 pos2)
-  (foldl (lambda (p1 p2 result)
-           (let ((index (first result)))
-             (if (equal? p1 p2)
-                 (list (add1 index) (second result))
-                 (list (add1 index)
-                       (cons
-                        (list (index->square index) p1 p2)
-                        (second result))))))
-         (list 0 empty)
-         (string->list POS1)
-         (string->list POS2)))
+  ;; 
+  (define (diff-move move square p1 p2)
+    (if (empty? move)
+        square
+        (if (symbol? move)
+            ;; If the square becomes empty, it is the source square
+            ;; otherwise it is the destination
+            (if (equal? p2 #\space)
+                (cons square move)
+                (cons move square))
+            move)))
+
+  (second
+   (foldl (lambda (p1 p2 result)
+            (let ((index (first result)))
+              (if (equal? p1 p2)
+                  (list (add1 index) (second result))
+                  (list (add1 index)
+                        (diff-move (second result) (index->square index) p1 p2)))))
+          (list 0 empty)
+          (string->list pos1)
+          (string->list pos2))))
+
 
 ;; This function should generate a new position string when given the initial
 ;; position string and a src-square/dest-square string
@@ -123,6 +164,21 @@
     (string-set! new-pos dest-index (string-ref curr-pos src-index))
     new-pos))
 
-(update-board pb (board-hash POS1))
+(define (style12->pos style12)
+  (string-replace
+   (string-replace style12 " " "")
+   "-" " "))
+
+(define game-list (map style12->pos moves))
+
+(define (clear-square pb square)
+  (let* ((pt (square->pt square 80))
+         (snip (send pb find-snip (pt-x pt) (pt-y pt))))
+    (when snip (send pb remove snip))))
+
+(update-board pb (board-hash (list-ref game-list curr-index)))
+
+(define (draw-board)
+  (update-board pb (board-hash (list-ref game-list curr-index))))
 
 (send frame show #t)

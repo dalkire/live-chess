@@ -1,5 +1,7 @@
 #lang racket
 
+(provide (all-defined-out))
+
 (define moves
   (list "rnbqkb-r pppppppp -----n-- -------- ---P---- -------- PPP-PPPP RNBQKBNR"
         "rnbqkb-r pppppppp -----n-- -------- ---P---- ----P--- PPP--PPP RNBQKBNR"
