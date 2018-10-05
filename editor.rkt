@@ -28,7 +28,7 @@
 (define (forward)
   (let ((move-pair (diff (list-ref game-list curr-index)
                          (list-ref game-list (add1 curr-index))))
-        (curr-board-hash (board-hash (list-ref game-list curr-index))))
+        (curr-board-hash (pos->board-hash (list-ref game-list curr-index))))
     (move pb curr-board-hash (car move-pair) (cdr move-pair)))
   (set! curr-index (add1 curr-index)))
   ;; (draw-board))
@@ -131,7 +131,7 @@
 
 ;; Should be the state of the board. A hash of square symbol keys to piece struct
 ;; values
-(define (board-hash pos)
+(define (pos->board-hash pos)
   (apply hash
          (flatten
           (map pos-pair->piece-struct (pos->pos-pairs pos)))))
@@ -234,9 +234,9 @@
   ;;        (snip (send pb find-snip (pt-x pt) (pt-y pt))))
   ;;   (when snip (send pb remove snip))))
 
-(update-board pb (board-hash (list-ref game-list curr-index)))
+(update-board pb (pos->board-hash (list-ref game-list curr-index)))
 
 (define (draw-board)
-  (update-board pb (board-hash (list-ref game-list curr-index))))
+  (update-board pb (pos->board-hash (list-ref game-list curr-index))))
 
 (send frame show #t)
