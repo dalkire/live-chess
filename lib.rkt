@@ -22,6 +22,11 @@
   #:transparent)
 (define-type (Maybe a) (U None (Some a)))
 
+(struct piece ([piece : (Maybe Piece)]
+               [snip : (Maybe Any)])
+  #:mutable
+  #:transparent)
+
 (struct pt ([x : Natural]
             [y : Natural])
   #:transparent)
@@ -59,6 +64,8 @@
 (define-type PieceChar (U #\p #\n #\b #\r #\q #\k
                           #\P #\N #\B #\R #\Q #\K
                           #\space))
+
+(define-type P piece)
 
 (define-type Piece (U 'wp 'wn 'wb 'wr 'wq 'wk
                       'bp 'bn 'bb 'br 'bq 'bk

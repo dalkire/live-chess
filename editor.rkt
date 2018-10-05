@@ -81,40 +81,71 @@
     (resize 80 80)
     (set-flags (cons 'handles-all-mouse-events (get-flags)))))
 
-(define (set-board board board-string)
-  (map char->snip
-       (string->list board-string)))
-
-(define (char->snip char)
-  (make-object piece-snip% "./pieces/alpha/alpha_bp.png" 'png/alpha #t))
-
-;; Should be the state of the board. A hash of square symbol keys to piece struct
-;; values
-(define (board-hash pos)
-  (apply hash
-         (flatten
-          (map (lambda (index)
-                 (let ((square (index->square index)))
-                   (cons square (square->piece square pos))))
-               (build-list 64 values)))))
-
-(define (update-board pb board-hash)
-  (hash-for-each board-hash
-                 (lambda (square maybe-piece)
-                   (let ((x (pt-x (square->pt square 80)))
-                         (y (pt-y (square->pt square 80))))
-                       (match maybe-piece
-                         [(Some piece)
-                          ;; (send pb remove (send pb find-snip x y))
-                          (send pb insert (piece->snip piece) x y)]
-                         [(None) void])))))
-
 (define (piece->snip piece)
   (let ((piece-path (string-append
                      "./pieces/alpha/alpha_"
                      (symbol->string piece)
                      ".png")))
     (make-object piece-snip% piece-path 'png/alpha #t)))
+
+(define piece-char->snip
+  (compose piece->snip piece-char->piece))
+
+(define (piece-char->maybe-piece piece-char)
+  (if (equal? piece-char #\space)
+      (None)
+      (Some (piece-char->piece piece-char))))
+
+(define (maybe-piece->maybe-snip maybe-piece)
+  (match maybe-piece
+    [(Some piece) (piece->snip)]
+    [(None) (None)]))
+
+(define maybe-piece-char->maybe-snip
+  (compose maybe-piece->maybe-snip piece-char->maybe-piece))
+
+;; (define (set-board board board-string)
+;;   (map char->snip
+;;        (string->list board-string)))
+
+;; A position pair (pos-pair) is an index and piece char.
+;; A square piece here is a square struct of maybe piece and maybe piece snip.
+(define (pos-pair->piece-struct pos-pair)
+  (let* ((index (car pos-pair))
+         (piece-char (cdr pos-pair))
+         (maybe-piece (if (equal? piece-char #\space)
+                         (None)
+                         (Some (piece-char->piece piece-char))))
+         (maybe-snip (if (equal? piece-char #\space)
+                         (None)
+                         (Some (piece-char->snip piece-char)))))
+    (cons (index->square index) (piece maybe-piece maybe-snip))))
+
+;; Given a position string, return a list of (index . piece-char)
+(define (pos->pos-pair pos)
+  (build-list (string-length pos)
+              (lambda (i)
+                (cons i
+                      (list-ref (string->list pos) i)))))
+
+;; Should be the state of the board. A hash of square symbol keys to piece struct
+;; values
+(define (board-hash pos)
+  (apply hash
+         (flatten
+          (map pos-pair->piece-struct (pos->pos-pair pos)))))
+
+(define (update-board pb board-hash)
+  (hash-for-each board-hash
+                 (lambda (square piece-struct)
+                   (let ((maybe-piece (piece-piece piece-struct))
+                         (x (pt-x (square->pt square 80)))
+                         (y (pt-y (square->pt square 80))))
+                       (match maybe-piece
+                         [(Some piece)
+                          ;; (send pb remove (send pb find-snip x y))
+                          (send pb insert (piece->snip piece) x y)]
+                         [(None) void])))))
 
 (define (move pb src-square dest-square)
   (let ((p1 (square-origin->square-center (square->pt src-square 80) 80))
