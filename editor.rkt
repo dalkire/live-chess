@@ -27,8 +27,9 @@
 
 (define (forward)
   (let ((move-pair (diff (list-ref game-list curr-index)
-                         (list-ref game-list (add1 curr-index)))))
-    (move pb (car move-pair) (cdr move-pair)))
+                         (list-ref game-list (add1 curr-index))))
+        (curr-board-hash (board-hash (list-ref game-list curr-index))))
+    (move pb curr-board-hash (car move-pair) (cdr move-pair)))
   (set! curr-index (add1 curr-index)))
   ;; (draw-board))
 
@@ -122,7 +123,7 @@
     (cons (index->square index) (piece maybe-piece maybe-snip))))
 
 ;; Given a position string, return a list of (index . piece-char)
-(define (pos->pos-pair pos)
+(define (pos->pos-pairs pos)
   (build-list (string-length pos)
               (lambda (i)
                 (cons i
@@ -133,29 +134,51 @@
 (define (board-hash pos)
   (apply hash
          (flatten
-          (map pos-pair->piece-struct (pos->pos-pair pos)))))
+          (map pos-pair->piece-struct (pos->pos-pairs pos)))))
 
 (define (update-board pb board-hash)
   (hash-for-each board-hash
                  (lambda (square piece-struct)
-                   (let ((maybe-piece (piece-piece piece-struct))
+                   (let ((maybe-snip (piece-snip piece-struct))
                          (x (pt-x (square->pt square 80)))
                          (y (pt-y (square->pt square 80))))
-                       (match maybe-piece
-                         [(Some piece)
+                       (match maybe-snip
+                         [(Some snip)
                           ;; (send pb remove (send pb find-snip x y))
-                          (send pb insert (piece->snip piece) x y)]
+                          (send pb insert snip x y)]
                          [(None) void])))))
 
-(define (move pb src-square dest-square)
-  (let ((p1 (square-origin->square-center (square->pt src-square 80) 80))
-        (p2 (square->pt dest-square 80)))
-    (let ((dest-snip (send pb find-snip (pt-x p2) (pt-y p2)))
-          (src-snip (send pb find-snip (pt-x p1) (pt-y p1))))
-      (when dest-snip
-        (send pb delete dest-snip))
-      (when src-snip
-        (send pb move-to src-snip (pt-x p2) (pt-y p2))))))
+(define (move-piece-snip pb snip square)
+  (let ((pt (square->pt square 80)))
+    (send pb move-to snip (pt-x pt) (pt-y pt))))
+
+(define (move pb board-hash src-square dest-square)
+  (let ((src-piece (hash-ref board-hash src-square))
+        (dest-piece (hash-ref board-hash dest-square)))
+    (match (piece-snip dest-piece)
+      [(Some dest-snip) (send pb delete dest-snip)]
+      [(None) void])
+    (match (piece-snip src-piece)
+      [(Some src-snip) (move-piece-snip pb src-snip dest-square)]
+      [(None) void]))
+  (update-board-hash board-hash src-square dest-square))
+  ;; (let ((p1 (square-origin->square-center (square->pt src-square 80) 80))
+  ;;       (p2 (square->pt dest-square 80)))
+  ;;   (let ((dest-snip (send pb find-snip (pt-x p2) (pt-y p2)))
+  ;;         (src-snip (send pb find-snip (pt-x p1) (pt-y p1))))
+  ;;     (when dest-snip
+  ;;       (send pb delete dest-snip))
+  ;;     (when src-snip
+  ;;       (send pb move-to src-snip (pt-x p2) (pt-y p2))))))
+
+
+(define (update-board-hash board-hash src-square dest-square)
+  (hash-set
+   (hash-set board-hash
+             dest-square
+             (hash-ref board-hash src-square))
+   src-square
+   (piece (None) (None))))
 
 ;; Attempting to build a differ (extract move from two positions)
 (define (diff pos1 pos2)
@@ -202,10 +225,14 @@
 
 (define game-list (map style12->pos moves))
 
-(define (clear-square pb square)
-  (let* ((pt (square->pt square 80))
-         (snip (send pb find-snip (pt-x pt) (pt-y pt))))
-    (when snip (send pb remove snip))))
+(define (clear-square pb board-hash square)
+  (let ((snip (piece-snip (hash-ref board-hash square))))
+    (match snip
+      [(Some ps) (send pb remove ps)]
+      [(None) void])))
+  ;; (let* ((pt (square->pt square 80))
+  ;;        (snip (send pb find-snip (pt-x pt) (pt-y pt))))
+  ;;   (when snip (send pb remove snip))))
 
 (update-board pb (board-hash (list-ref game-list curr-index)))
 
