@@ -224,10 +224,10 @@
 (define (piece-char->piece piece-char)
   (if (char-upper-case? piece-char)
       (cast
-       (string->symbol (string #\b (char-downcase piece-char)))
+       (string->symbol (string #\w (char-downcase piece-char)))
        Piece)
       (cast
-       (string->symbol (string #\w piece-char))
+       (string->symbol (string #\b piece-char))
        Piece)))
 
 ;; Given a square symbol, what is that square's index in the 64-element string

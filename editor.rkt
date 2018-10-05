@@ -25,21 +25,6 @@
          (backward)]))
     (super-new)))
 
-(define (forward)
-  (let ((move-pair (diff (list-ref game-list curr-index)
-                         (list-ref game-list (add1 curr-index))))
-        (curr-board-hash (pos->board-hash (list-ref game-list curr-index))))
-    (move pb curr-board-hash (car move-pair) (cdr move-pair)))
-  (set! curr-index (add1 curr-index)))
-  ;; (draw-board))
-
-(define (backward)
-  (let ((move-pair (diff (list-ref game-list curr-index)
-                         (list-ref game-list (sub1 curr-index)))))
-    (move pb (car move-pair) (cdr move-pair)))
-  (set! curr-index (sub1 curr-index)))
-  ;; (draw-board))
-
 (define canvas
   (new my-canvas% [parent frame]))
 
@@ -82,6 +67,19 @@
     (resize 80 80)
     (set-flags (cons 'handles-all-mouse-events (get-flags)))))
 
+;; Should be the state of the board. A hash of square symbol keys to piece struct
+;; values
+(define (pos->board-hash pos)
+  (make-hash
+   (map pos-pair->piece-struct (pos->pos-pairs pos))))
+
+;; Given a position string, return a list of (index . piece-char)
+(define (pos->pos-pairs pos)
+  (build-list (string-length pos)
+              (lambda (i)
+                (cons i
+                      (list-ref (string->list pos) i)))))
+
 (define (piece->snip piece)
   (let ((piece-path (string-append
                      "./pieces/alpha/alpha_"
@@ -105,10 +103,6 @@
 (define maybe-piece-char->maybe-snip
   (compose maybe-piece->maybe-snip piece-char->maybe-piece))
 
-;; (define (set-board board board-string)
-;;   (map char->snip
-;;        (string->list board-string)))
-
 ;; A position pair (pos-pair) is an index and piece char.
 ;; A square piece here is a square struct of maybe piece and maybe piece snip.
 (define (pos-pair->piece-struct pos-pair)
@@ -122,21 +116,36 @@
                          (Some (piece-char->snip piece-char)))))
     (cons (index->square index) (piece maybe-piece maybe-snip))))
 
-;; Given a position string, return a list of (index . piece-char)
-(define (pos->pos-pairs pos)
-  (build-list (string-length pos)
-              (lambda (i)
-                (cons i
-                      (list-ref (string->list pos) i)))))
+(define (style12->pos style12)
+  (string-replace
+   (string-replace style12 " " "")
+   "-" " "))
 
-;; Should be the state of the board. A hash of square symbol keys to piece struct
-;; values
-(define (pos->board-hash pos)
-  (apply hash
-         (flatten
-          (map pos-pair->piece-struct (pos->pos-pairs pos)))))
+(define game-list (map style12->pos moves))
 
-(define (update-board pb board-hash)
+(define board-hash (pos->board-hash (list-ref game-list curr-index)))
+
+(define (forward)
+  (let ((move-pair (diff (list-ref game-list curr-index)
+                         (list-ref game-list (add1 curr-index)))))
+    (displayln (cons curr-index move-pair))
+    (displayln (list-ref game-list (add1 curr-index)))
+    (move pb (car move-pair) (cdr move-pair)))
+  (set! curr-index (add1 curr-index)))
+
+(define (backward)
+  (let ((move-pair (diff (list-ref game-list curr-index)
+                         (list-ref game-list (sub1 curr-index)))))
+    (move pb (car move-pair) (cdr move-pair)))
+  (set! curr-index (sub1 curr-index)))
+
+;; (define (set-board board board-string)
+;;   (map char->snip
+;;        (string->list board-string)))
+
+;; Set the board from a board-hash. Important to know that board-hash is mutable
+;; and holds references to the piece snips
+(define (set-board pb board-hash)
   (hash-for-each board-hash
                  (lambda (square piece-struct)
                    (let ((maybe-snip (piece-snip piece-struct))
@@ -144,7 +153,6 @@
                          (y (pt-y (square->pt square 80))))
                        (match maybe-snip
                          [(Some snip)
-                          ;; (send pb remove (send pb find-snip x y))
                           (send pb insert snip x y)]
                          [(None) void])))))
 
@@ -152,7 +160,7 @@
   (let ((pt (square->pt square 80)))
     (send pb move-to snip (pt-x pt) (pt-y pt))))
 
-(define (move pb board-hash src-square dest-square)
+(define (move pb src-square dest-square)
   (let ((src-piece (hash-ref board-hash src-square))
         (dest-piece (hash-ref board-hash dest-square)))
     (match (piece-snip dest-piece)
@@ -173,16 +181,15 @@
 
 
 (define (update-board-hash board-hash src-square dest-square)
-  (hash-set
-   (hash-set board-hash
-             dest-square
-             (hash-ref board-hash src-square))
-   src-square
-   (piece (None) (None))))
+   (hash-set! board-hash
+              dest-square
+              (hash-ref board-hash src-square))
+  (hash-set! board-hash
+             src-square
+             (piece (None) (None))))
 
 ;; Attempting to build a differ (extract move from two positions)
 (define (diff pos1 pos2)
-  ;; 
   (define (diff-move move square p1 p2)
     (if (empty? move)
         square
@@ -218,13 +225,6 @@
     (string-set! new-pos dest-index (string-ref curr-pos src-index))
     new-pos))
 
-(define (style12->pos style12)
-  (string-replace
-   (string-replace style12 " " "")
-   "-" " "))
-
-(define game-list (map style12->pos moves))
-
 (define (clear-square pb board-hash square)
   (let ((snip (piece-snip (hash-ref board-hash square))))
     (match snip
@@ -234,9 +234,6 @@
   ;;        (snip (send pb find-snip (pt-x pt) (pt-y pt))))
   ;;   (when snip (send pb remove snip))))
 
-(update-board pb (pos->board-hash (list-ref game-list curr-index)))
-
-(define (draw-board)
-  (update-board pb (pos->board-hash (list-ref game-list curr-index))))
+(set-board pb board-hash)
 
 (send frame show #t)
