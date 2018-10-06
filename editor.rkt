@@ -108,13 +108,13 @@
 (define (pos-pair->piece-struct pos-pair)
   (let* ((index (car pos-pair))
          (piece-char (cdr pos-pair))
-         (maybe-piece (if (equal? piece-char #\space)
-                         (None)
-                         (Some (piece-char->piece piece-char))))
-         (maybe-snip (if (equal? piece-char #\space)
-                         (None)
-                         (Some (piece-char->snip piece-char)))))
-    (cons (index->square index) (piece maybe-piece maybe-snip))))
+         (maybe-piece-struct
+          (if (equal? piece-char #\space)
+              (None)
+              (Some (piece
+                     (piece-char->piece piece-char)
+                     (piece-char->snip piece-char))))))
+         (cons (index->square index) maybe-piece-struct)))
 
 (define (style12->pos style12)
   (string-replace
@@ -147,14 +147,13 @@
 ;; and holds references to the piece snips
 (define (set-board pb board-hash)
   (hash-for-each board-hash
-                 (lambda (square piece-struct)
-                   (let ((maybe-snip (piece-snip piece-struct))
-                         (x (pt-x (square->pt square 80)))
-                         (y (pt-y (square->pt square 80))))
-                       (match maybe-snip
-                         [(Some snip)
-                          (send pb insert snip x y)]
-                         [(None) void])))))
+                 (lambda (square maybe-piece-struct)
+                   (match maybe-piece-struct
+                     [(Some piece-struct)
+                      (let ((x (pt-x (square->pt square 80)))
+                            (y (pt-y (square->pt square 80))))
+                        (send pb insert (piece-snip piece-struct) x y))]
+                     [(None) void]))))
 
 (define (move-piece-snip pb snip square)
   (let ((pt (square->pt square 80)))
@@ -163,22 +162,14 @@
 (define (move pb src-square dest-square)
   (let ((src-piece (hash-ref board-hash src-square))
         (dest-piece (hash-ref board-hash dest-square)))
-    (match (piece-snip dest-piece)
-      [(Some dest-snip) (send pb delete dest-snip)]
+    (match dest-piece
+      [(Some piece-struct) (send pb delete (piece-snip piece-struct))]
       [(None) void])
-    (match (piece-snip src-piece)
-      [(Some src-snip) (move-piece-snip pb src-snip dest-square)]
+    (match src-piece
+      [(Some piece-struct)
+       (move-piece-snip pb (piece-snip piece-struct) dest-square)]
       [(None) void]))
   (update-board-hash board-hash src-square dest-square))
-  ;; (let ((p1 (square-origin->square-center (square->pt src-square 80) 80))
-  ;;       (p2 (square->pt dest-square 80)))
-  ;;   (let ((dest-snip (send pb find-snip (pt-x p2) (pt-y p2)))
-  ;;         (src-snip (send pb find-snip (pt-x p1) (pt-y p1))))
-  ;;     (when dest-snip
-  ;;       (send pb delete dest-snip))
-  ;;     (when src-snip
-  ;;       (send pb move-to src-snip (pt-x p2) (pt-y p2))))))
-
 
 (define (update-board-hash board-hash src-square dest-square)
    (hash-set! board-hash
@@ -186,7 +177,7 @@
               (hash-ref board-hash src-square))
   (hash-set! board-hash
              src-square
-             (piece (None) (None))))
+             (None)))
 
 ;; Attempting to build a differ (extract move from two positions)
 (define (diff pos1 pos2)
