@@ -129,7 +129,7 @@
   (let ((move-pair (diff (list-ref game-list curr-index)
                          (list-ref game-list (add1 curr-index)))))
     (displayln (cons curr-index move-pair))
-    (displayln (list-ref game-list (add1 curr-index)))
+    (print-pos (list-ref game-list (add1 curr-index)))
     (move pb (car move-pair) (cdr move-pair)))
   (set! curr-index (add1 curr-index)))
 
@@ -221,9 +221,17 @@
     (match snip
       [(Some ps) (send pb remove ps)]
       [(None) void])))
-  ;; (let* ((pt (square->pt square 80))
-  ;;        (snip (send pb find-snip (pt-x pt) (pt-y pt))))
-  ;;   (when snip (send pb remove snip))))
+
+(define (print-pos pos)
+  (displayln "\n")
+  (map (lambda (i)
+         (displayln (string-join (map string (string->list (string-replace
+                     (substring pos
+                                (* 8 i)
+                                (+ (* 8 i) 8))
+                     " "
+                     "-"))))))
+       (build-list 8 values)))
 
 (set-board pb board-hash)
 
