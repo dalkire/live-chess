@@ -20,7 +20,7 @@
     (define/override (on-char key-event)
       (cond
         [(equal? (send key-event get-key-code) 'right)
-         (forward)]
+         (fw)]
         [(equal? (send key-event get-key-code) 'left)
          (backward)]))
     (super-new)))
@@ -132,6 +132,21 @@
     (print-pos (list-ref game-list (add1 curr-index)))
     (move pb (car move-pair) (cdr move-pair)))
   (set! curr-index (add1 curr-index)))
+
+(define (fw)
+  (let ((move-list (map cdr
+                        (hash->list
+                         (square-delta->move-hash
+                          (delta->square-delta
+                           (delta (list-ref game-list curr-index)
+                                  (list-ref game-list (add1 curr-index)))))))))
+    (print-pos (list-ref game-list (add1 curr-index)))
+    (map (λ (move-pair)
+           (displayln (cons curr-index move-pair))
+           (move pb (car move-pair) (cdr move-pair)))
+         move-list))
+  (set! curr-index (add1 curr-index)))
+
 
 (define (backward)
   (let ((move-pair (diff (list-ref game-list curr-index)
