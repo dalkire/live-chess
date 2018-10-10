@@ -76,7 +76,7 @@
 ;; Given a position string, return a list of (index . piece-char)
 (define (pos->pos-pairs pos)
   (build-list (string-length pos)
-              (lambda (i)
+              (λ (i)
                 (cons i
                       (list-ref (string->list pos) i)))))
 
@@ -147,7 +147,7 @@
 ;; and holds references to the piece snips
 (define (set-board pb board-hash)
   (hash-for-each board-hash
-                 (lambda (square maybe-piece-struct)
+                 (λ (square maybe-piece-struct)
                    (match maybe-piece-struct
                      [(Some piece-struct)
                       (let ((x (pt-x (square->pt square 80)))
@@ -193,7 +193,7 @@
             move)))
 
   (second
-   (foldl (lambda (p1 p2 result)
+   (foldl (λ (p1 p2 result)
             (let ((index (first result)))
               (if (equal? p1 p2)
                   (list (add1 index) (second result))
@@ -203,6 +203,60 @@
           (string->list pos1)
           (string->list pos2))))
 
+;; '((e8 #\k . #\space) (f8 #\space . #\r) (g8 #\space . #\k) (h8 #\r . #\space))
+(define (delta->square-delta delta-list)
+  (filter (λ (square-delta)
+            (not (false? (cdr square-delta))))
+          (map (λ (index delta)
+                 (cons (index->square index) delta))
+               (build-list 64 values)
+               delta-list)))
+
+;; '((e8 #\k . #\space) (f8 #\space . #\r) (g8 #\space . #\k) (h8 #\r . #\space))
+(define (square-delta->move-hash square-deltas)
+  ;; maybe use reduce to make hash w/ piece as key and square pair as value
+  ;; if the piece isn't in the hash, add it w/ the square. if it is in the
+  ;; hash, look at whether it's the source or destination and combine w/
+  ;; current hash value accordingly
+
+  ;; given a diff cons, return the piece-char that's moving
+  (define (which-piece diff)
+    ;; if the cdr is #\space, the piece vacating its square is the one moving
+    (if (equal? #\space (cdr diff))
+        (car diff)
+        (cdr diff)))
+
+  (foldl (λ (square-delta move-hash)
+           (let ((piece-char (which-piece (cdr square-delta))))
+             ;; if the piece is already in the hash, set the square to either
+             ;; source or destination
+             (if (hash-has-key? move-hash piece-char)
+                 ;; if the piece moving is in the car, we are looking at the
+                 ;; source square
+                 (if (equal? (cadr square-delta) piece-char)
+                     (hash-set move-hash piece-char
+                               (cons (car square-delta)
+                                     (hash-ref move-hash piece-char)))
+                     (hash-set move-hash piece-char
+                               (cons (hash-ref move-hash piece-char)
+                                     (car square-delta))))
+                 ;; the piece wasn't found in the hash so set the piece char
+                 ;; as the key and the square as the value
+                 (hash-set move-hash piece-char (car square-delta)))))
+         (make-immutable-hash empty)
+         square-deltas))
+
+;; Trying to account for castling. See:
+;; (filter pair? (delta (list-ref game-list 21) (list-ref game-list 22)))
+(define (delta pos1 pos2)
+  ;; Map over a list of 64 values and mark whether there is a difference between
+  ;; the positions
+  (map (λ (piece-char1 piece-char2)
+         (if (equal? piece-char1 piece-char2)
+             #f
+             (cons piece-char1 piece-char2)))
+       (string->list pos1)
+       (string->list pos2)))
 
 ;; This function should generate a new position string when given the initial
 ;; position string and a src-square/dest-square string
@@ -223,15 +277,16 @@
       [(None) void])))
 
 (define (print-pos pos)
-  (displayln "\n")
-  (map (lambda (i)
+  (displayln "")
+  (map (λ (i)
          (displayln (string-join (map string (string->list (string-replace
                      (substring pos
                                 (* 8 i)
                                 (+ (* 8 i) 8))
                      " "
                      "-"))))))
-       (build-list 8 values)))
+       (build-list 8 values))
+  (displayln ""))
 
 (set-board pb board-hash)
 
